@@ -1,0 +1,9 @@
+{
+  "name": "Ex03",
+  "version": "1.0.0",
+  "description": "Exercício 03 da disciplina Programação para Internet I, ADS, IFPI.",
+  "main": "index.js",
+  "author": "Marcos Abreu <MAbr88@ProtonMail.com>",
+  "license": "MIT",
+  "private": false
+}
