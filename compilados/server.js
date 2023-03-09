@@ -23,17 +23,44 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.server = void 0;
 const net = __importStar(require("net"));
-const server = net.createServer((socket) => {
-    console.log(`Cliente conectado: ${socket.remoteAddress}:${socket.remotePort}`);
-    socket.write('Olá, cliente!\n');
-    socket.on('data', (data) => {
-        console.log(`Mensagem do cliente: ${data.toString()}`);
+const clients = new Map();
+const words = [];
+function server() {
+    const server = net.createServer((socket) => {
+        const { remoteAddress, remotePort } = socket;
+        const clientInfo = { address: remoteAddress, port: remotePort };
+        clients.set(socket, clientInfo);
+        console.log(`Cliente conectado: ${remoteAddress}:${remotePort}`);
+        socket.write('Olá, cliente!\n');
+        socket.on('data', (data) => {
+            const inputClient = data.toString().trim();
+            if (inputClient === 'desconectar') {
+                socket.write('Desconectado');
+                socket.end();
+                console.log(`Cliente desconectado: ${remoteAddress}:${remotePort}`);
+                clients.delete(socket);
+            }
+            else {
+                words.push(inputClient);
+                if (words.length === 2) {
+                    const [word1, word2] = words;
+                    const result = word1 === word2 ? 'true' : 'false';
+                    clients.forEach((client, socket) => {
+                        socket.write(result);
+                    });
+                    words.length = 0;
+                }
+            }
+        });
     });
-    socket.on('end', () => {
-        console.log('Cliente desconectado');
+    server.on('error', (err) => {
+        console.error(`Ocorreu um erro no servidor: ${err.message}`);
     });
-});
-server.listen(3000, () => {
-    console.log('Servidor inicializado na porta 3000');
-});
+    server.listen(3000, () => {
+        console.log('Servidor inicializado na porta 3000');
+    });
+}
+exports.server = server;
+server();

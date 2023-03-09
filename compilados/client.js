@@ -22,18 +22,39 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.client = void 0;
 const net = __importStar(require("net"));
-const client = new net.Socket();
-client.connect(3000, 'localhost', () => {
-    console.log('Conectado ao servidor');
-    client.write('Olá, eu sou o cliente');
-});
-client.on('data', (data) => {
-    console.log(`Mensagem do servidor: ${data.toString()}`);
-    client.write('Vou desconectar');
-    client.end();
-});
-client.on('end', () => {
-    console.log('Desconectado do servidor');
-});
+const readline_1 = __importDefault(require("readline"));
+function client(id) {
+    const rl = readline_1.default.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+    const client = new net.Socket();
+    const clientInfo = { id, socket: client };
+    client.connect(3000, 'localhost', () => {
+        console.log(`Conectado ao servidor como cliente ${id}`);
+    });
+    client.on('data', (data) => {
+        console.log(`> Mensagem do servidor para cliente ${id}: ${data.toString()}`);
+    });
+    client.on('error', (err) => {
+        console.error(`Erro ao conectar ao servidor: ${err.message}`);
+    });
+    rl.addListener('line', line => {
+        client.write(`[${id}]: ${line}`);
+    });
+    rl.on('close', () => {
+        client.end();
+    });
+    client.on('close', () => {
+        console.log(`Conexão com o servidor encerrada para o cliente ${id}`);
+        process.exit();
+    });
+}
+exports.client = client;
+client('cliente1');

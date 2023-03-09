@@ -105,3 +105,6 @@ dist
 .vscode/settings.json
 /testes
 /compilados
+compilados/client.js
+compilados/Exist2Users.js
+compilados/server.js
