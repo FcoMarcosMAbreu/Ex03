@@ -1,51 +1,52 @@
 import * as net from 'net';
 
-interface ClientInfo {
-   address: string;
-   port: number;
+
+const palavraAdvinhar = 'teste';
+let chances = 8;
+
+function verificarLetra(letra: string): string {
+   if (palavraAdvinhar.includes(letra)) {
+      return `A letra ${letra} está presente na palavra`;
+   } else {
+      chances--; 
+      return `A letra ${letra} não está presente na palavra`;
+   }
 }
 
-const clients = new Map<net.Socket, ClientInfo>();
-const words: string[] = [];
+function placar(): number {
+   return chances;
+}
 
-export function server(): void {
+export function meuServer(): void {
    const server = net.createServer((socket: net.Socket) => {
       const { remoteAddress, remotePort } = socket;
-      const clientInfo: ClientInfo = { address: remoteAddress!, port: remotePort! };
-      clients.set(socket, clientInfo);
-
       console.log(`Cliente conectado: ${remoteAddress}:${remotePort}`);
-      socket.write('Olá, cliente!\n');
+      socket.write('Bem vindo\n');
+      socket.write(`Você tem ${chances} chances iniciais. Digite uma letra:\n`);
 
       socket.on('data', (data: Buffer) => {
-         const inputClient = data.toString().trim();
+         const msgDoCliente = data.toString().trim();
 
-         if (inputClient === 'desconectar') {
+         if (msgDoCliente === 'desconectar') {
             socket.write('Desconectado');
             socket.end();
             console.log(`Cliente desconectado: ${remoteAddress}:${remotePort}`);
-            clients.delete(socket);
-         } else {
-            words.push(inputClient);
-            if (words.length === 2) {
-               const [word1, word2] = words;
-               const result = word1 === word2 ? 'true' : 'false';
-               clients.forEach((client, socket) => {
-                  socket.write(result);
-               });
-               words.length = 0;
-            }
+         } else if (msgDoCliente.length === 1) {
+            const resultado = verificarLetra(msgDoCliente);
+            socket.write(`RESULT:${resultado}\n`);
+            socket.write(`CHANCES:${placar()}\n`);
          }
       });
+
    });
 
    server.on('error', (err: Error) => {
       console.error(`Ocorreu um erro no servidor: ${err.message}`);
    });
 
-   server.listen(3000, () => {
-      console.log('Servidor inicializado na porta 3000');
+   server.listen(4000, () => {
+      console.log('Servidor inicializado na porta 4000');
    });
 }
 
-server()
+meuServer();

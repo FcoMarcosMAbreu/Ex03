@@ -23,44 +23,49 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.server = void 0;
+exports.meuServer = void 0;
 const net = __importStar(require("net"));
-const clients = new Map();
-const words = [];
-function server() {
+// const words: string[] = [];
+const palavraAdvinhar = 'teste';
+let chances = 8;
+function verificarLetra(letra) {
+    if (palavraAdvinhar.includes(letra)) {
+        return `A letra ${letra} está presente na palavra`;
+    }
+    else {
+        chances--;
+        return `A letra ${letra} não está presente na palavra`;
+    }
+}
+function placar() {
+    return chances;
+}
+function meuServer() {
     const server = net.createServer((socket) => {
         const { remoteAddress, remotePort } = socket;
-        const clientInfo = { address: remoteAddress, port: remotePort };
-        clients.set(socket, clientInfo);
         console.log(`Cliente conectado: ${remoteAddress}:${remotePort}`);
-        socket.write('Olá, cliente!\n');
+        socket.write('Bem vindo\n');
+        socket.write(`Você tem ${chances} chances iniciais. Digite uma letra:\n`);
         socket.on('data', (data) => {
-            const inputClient = data.toString().trim();
-            if (inputClient === 'desconectar') {
+            const msgDoCliente = data.toString().trim();
+            if (msgDoCliente === 'desconectar') {
                 socket.write('Desconectado');
                 socket.end();
                 console.log(`Cliente desconectado: ${remoteAddress}:${remotePort}`);
-                clients.delete(socket);
             }
-            else {
-                words.push(inputClient);
-                if (words.length === 2) {
-                    const [word1, word2] = words;
-                    const result = word1 === word2 ? 'true' : 'false';
-                    clients.forEach((client, socket) => {
-                        socket.write(result);
-                    });
-                    words.length = 0;
-                }
+            else if (msgDoCliente.length === 1) {
+                const resultado = verificarLetra(msgDoCliente);
+                socket.write(`RESULT:${resultado}\n`);
+                socket.write(`CHANCES:${placar()}\n`);
             }
         });
     });
     server.on('error', (err) => {
         console.error(`Ocorreu um erro no servidor: ${err.message}`);
     });
-    server.listen(3000, () => {
-        console.log('Servidor inicializado na porta 3000');
+    server.listen(4000, () => {
+        console.log('Servidor inicializado na porta 4000');
     });
 }
-exports.server = server;
-server();
+exports.meuServer = meuServer;
+meuServer();

@@ -22,39 +22,77 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
+exports.meuClient = void 0;
 const net = __importStar(require("net"));
 const readline_1 = __importDefault(require("readline"));
-function client(id) {
-    const rl = readline_1.default.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    const client = new net.Socket();
-    const clientInfo = { id, socket: client };
-    client.connect(3000, 'localhost', () => {
-        console.log(`Conectado ao servidor como cliente ${id}`);
-    });
-    client.on('data', (data) => {
-        console.log(`> Mensagem do servidor para cliente ${id}: ${data.toString()}`);
-    });
-    client.on('error', (err) => {
-        console.error(`Erro ao conectar ao servidor: ${err.message}`);
-    });
-    rl.addListener('line', line => {
-        client.write(`[${id}]: ${line}`);
-    });
-    rl.on('close', () => {
-        client.end();
-    });
-    client.on('close', () => {
-        console.log(`Conexão com o servidor encerrada para o cliente ${id}`);
-        process.exit();
+function escolherNomeJogador() {
+    return new Promise((resolve) => {
+        const rl = readline_1.default.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Digite seu nome: ', (id) => {
+            rl.close();
+            resolve(id);
+        });
     });
 }
-exports.client = client;
-client('cliente1');
+function meuClient() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const id = yield escolherNomeJogador();
+        const client = new net.Socket();
+        client.connect(4000, 'localhost', () => {
+            // console.log(`Conectado ao servidor como cliente ${id}`);
+            client.write(`ID:${id}`);
+        });
+        client.on('data', (data) => {
+            const msgDoServidor = data.toString().trim();
+            if (msgDoServidor.startsWith('RESULT:')) {
+                const result = msgDoServidor.slice('RESULT:'.length);
+                // console.log(`> Resultado para cliente ${id}: ${result}`);
+                console.log(`> ${result}`);
+            }
+            else {
+                console.log(`> Mensagem do servidor para cliente ${id}: ${msgDoServidor}`);
+            }
+        });
+        client.on('error', (err) => {
+            console.error(`Erro ao conectar ao servidor: ${err.message}`);
+        });
+        const rl = readline_1.default.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.on('line', (input) => {
+            const letra = input.trim().split('');
+            if (letra.length === 1) {
+                client.write(`${letra[0]}`);
+            }
+            else if (input === 'desconectar') {
+                client.write(input);
+            }
+            else {
+                console.log('> Digite apenas uma letra');
+            }
+        });
+        client.on('close', () => {
+            console.log(`Conexão com o servidor encerrada para o cliente ${id}`);
+            process.exit();
+        });
+    });
+}
+exports.meuClient = meuClient;
+meuClient();

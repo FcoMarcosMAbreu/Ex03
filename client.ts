@@ -1,45 +1,61 @@
 import * as net from 'net';
 import readline from 'readline';
 
-interface ClientInfo {
-   id: string;
-   socket: net.Socket;
-}
 
-function chooseClientId(): Promise<string> {
+function escolherNomeJogador(): Promise<string> {
    return new Promise((resolve) => {
       const rl = readline.createInterface({
          input: process.stdin,
          output: process.stdout,
       });
-      rl.question('Digite o ID do cliente: ', (id) => {
+      rl.question('Digite seu nome: ', (id) => {
          rl.close();
          resolve(id);
       });
    });
 }
-
-export async function client(): Promise<void> {
-   const id = await chooseClientId();
+export async function meuClient(): Promise<void> {
+   const id = await escolherNomeJogador();
    const client: net.Socket = new net.Socket();
-   const clientInfo: ClientInfo = { id, socket: client };
 
-   client.connect(3000, 'localhost', () => {
-      console.log(`Conectado ao servidor como cliente ${id}`);
+   client.connect(4000, 'localhost', () => {
+      // console.log(`Conectado ao servidor como cliente ${id}`);
       client.write(`ID:${id}`);
    });
 
    client.on('data', (data: Buffer) => {
-      console.log(`> Mensagem do servidor para cliente ${id}: ${data.toString()}`);
+      const msgDoServidor = data.toString().trim();
+      if (msgDoServidor.startsWith('RESULT:')) {
+         const result = msgDoServidor.slice('RESULT:'.length);
+         // console.log(`> Resultado para cliente ${id}: ${result}`);
+         console.log(`> ${result}`);
+      } else {
+         console.log(`> Mensagem do servidor para cliente ${id}: ${msgDoServidor}`);
+      }
    });
 
    client.on('error', (err) => {
       console.error(`Erro ao conectar ao servidor: ${err.message}`);
    });
 
-   process.stdin.on('data', (data: Buffer) => {
-      client.write(`[${id}]: ${data.toString()}`);
+   const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
    });
+
+   rl.on('line', (input: string) => {
+      const letra = input.trim().split('');
+      if (letra.length === 1) {
+         client.write(`${letra[0]}`);
+
+      } else if(input === 'desconectar') {
+         client.write(input)
+
+      }else {
+         console.log('> Digite apenas uma letra');
+      }
+   });
+
 
    client.on('close', () => {
       console.log(`Conexão com o servidor encerrada para o cliente ${id}`);
@@ -47,4 +63,4 @@ export async function client(): Promise<void> {
    });
 }
 
-client()
+meuClient()
