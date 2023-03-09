@@ -6,17 +6,27 @@ interface ClientInfo {
    socket: net.Socket;
 }
 
-export function client(id: string): void {
-   const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
+function chooseClientId(): Promise<string> {
+   return new Promise((resolve) => {
+      const rl = readline.createInterface({
+         input: process.stdin,
+         output: process.stdout,
+      });
+      rl.question('Digite o ID do cliente: ', (id) => {
+         rl.close();
+         resolve(id);
+      });
    });
+}
 
+export async function client(): Promise<void> {
+   const id = await chooseClientId();
    const client: net.Socket = new net.Socket();
    const clientInfo: ClientInfo = { id, socket: client };
 
    client.connect(3000, 'localhost', () => {
       console.log(`Conectado ao servidor como cliente ${id}`);
+      client.write(`ID:${id}`);
    });
 
    client.on('data', (data: Buffer) => {
@@ -27,12 +37,8 @@ export function client(id: string): void {
       console.error(`Erro ao conectar ao servidor: ${err.message}`);
    });
 
-   rl.addListener('line', line => {
-      client.write(`[${id}]: ${line}`);
-   });
-
-   rl.on('close', () => {
-      client.end();
+   process.stdin.on('data', (data: Buffer) => {
+      client.write(`[${id}]: ${data.toString()}`);
    });
 
    client.on('close', () => {
@@ -41,4 +47,4 @@ export function client(id: string): void {
    });
 }
 
-client('cliente1');
+client()
