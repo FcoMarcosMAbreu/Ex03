@@ -38,6 +38,7 @@ export async function client(): Promise<void> {
    });
 
    process.stdin.on('data', (data: Buffer) => {
+      // Aqui serão feitas as jogadas ou o comando de sair.
       client.write(`[${id}]: ${data.toString()}`);
    });
 

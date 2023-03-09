@@ -19,7 +19,7 @@ export function server(): void {
 
       socket.on('data', (data: Buffer) => {
          const inputClient = data.toString().trim();
-
+         // Aqui serão feitas as regras do jogo.
          if (inputClient === 'desconectar') {
             socket.write('Desconectado');
             socket.end();
