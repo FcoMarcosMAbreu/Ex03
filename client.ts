@@ -14,6 +14,32 @@ function escolherNomeJogador(): Promise<string> {
       });
    });
 }
+
+const receberResultadoJogada = (id: string, data: Buffer): void => {
+   const msgDoServidor = data.toString().trim();
+   if (msgDoServidor.startsWith('RESULT:')) {
+      const result = msgDoServidor.slice('RESULT:'.length);
+      console.log(`> ${result}`);
+   } else {
+      console.log(`> Mensagem do servidor para cliente ${id}: ${msgDoServidor}`);
+   }
+};
+
+const tratarPrincipaisEntradas = (input: string, client: net.Socket): void => {
+   const letra = input.trim().split('');
+   if (letra.length === 1) {
+      client.write(`${letra[0]}`);
+
+   } else if(input === 'desconectar') {
+      client.write(input)
+
+   }else {
+      console.log('> Digite apenas uma letra');
+   }
+};
+
+
+
 export async function meuClient(): Promise<void> {
    const id = await escolherNomeJogador();
    const client: net.Socket = new net.Socket();
@@ -24,38 +50,21 @@ export async function meuClient(): Promise<void> {
    });
 
    client.on('data', (data: Buffer) => {
-      const msgDoServidor = data.toString().trim();
-      if (msgDoServidor.startsWith('RESULT:')) {
-         const result = msgDoServidor.slice('RESULT:'.length);
-         // console.log(`> Resultado para cliente ${id}: ${result}`);
-         console.log(`> ${result}`);
-      } else {
-         console.log(`> Mensagem do servidor para cliente ${id}: ${msgDoServidor}`);
-      }
+      receberResultadoJogada(id, data);
    });
 
    client.on('error', (err) => {
       console.error(`Erro ao conectar ao servidor: ${err.message}`);
    });
 
-   const rl = readline.createInterface({
+   const lerEntrada = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
    });
 
-   rl.on('line', (input: string) => {
-      const letra = input.trim().split('');
-      if (letra.length === 1) {
-         client.write(`${letra[0]}`);
-
-      } else if(input === 'desconectar') {
-         client.write(input)
-
-      }else {
-         console.log('> Digite apenas uma letra');
-      }
+   lerEntrada.on('line', (input: string) => {
+      tratarPrincipaisEntradas(input, client);
    });
-
 
    client.on('close', () => {
       console.log(`Conexão com o servidor encerrada para o cliente ${id}`);
