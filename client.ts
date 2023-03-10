@@ -9,8 +9,8 @@ client.connect(3000, 'localhost', () => {
 
 client.on('data', (data: Buffer) => {
    console.log(`Mensagem do servidor: ${data.toString()}`);
-   client.write('Vou desconectar');
-   client.end();
+   /* client.write('Vou desconectar'); */
+   /* client.end(); */
 });
 
 client.on('end', () => {
