@@ -3,6 +3,7 @@ import * as net from 'net';
 interface Cliente {
    chances: number;
    palavraAdvinhar: string;
+   socket: net.Socket;
 }
 
 function escreverNoSocket(socket: net.Socket, mensagem: string): void {
@@ -28,14 +29,19 @@ function gerarPlacarIndividual(cliente: Cliente): { chances: number; palavraAdvi
 
 export function meuServer(): void {
    const server = net.createServer((socket: net.Socket) => {
-      const { remoteAddress, remotePort } = socket;
-      console.log(`Cliente conectado: ${remoteAddress}:${remotePort}`);
-      escreverNoSocket(socket, 'Bem vindo');
-
       const cliente: Cliente = {
          chances: 8,
          palavraAdvinhar: 'teste',
+         socket,
+         // . cada cliente é identificado pelo seu socket
+         // . o acesso é dentro do evento data do socket para ler e escrever dados
       };
+      // const { remoteAddress, remotePort } = socket;
+      console.log(`Cliente conectado: ${cliente.socket.remoteAddress}:${cliente.socket.remotePort}`);
+      escreverNoSocket(socket, 'Bem vindo');
+
+      // console.log(`Teste socket: ${cliente.socket.remoteAddress}`);
+      // forma correta
 
       escreverNoSocket(socket, `Você tem ${cliente.chances} chances iniciais. Digite uma letra:`);
 
@@ -45,7 +51,7 @@ export function meuServer(): void {
          if (msgDoCliente === 'desconectar') {
             escreverNoSocket(socket, 'Desconectado');
             socket.end();
-            console.log(`Cliente desconectado: ${remoteAddress}:${remotePort}`);
+            console.log(`Cliente desconectado: ${cliente.socket.remoteAddress}:${cliente.socket.remotePort}`);
          } else if (msgDoCliente.length === 1) {
             const resultado = verificarLetra(msgDoCliente, cliente);
             escreverNoSocket(socket, `RESULT:${resultado}`);
