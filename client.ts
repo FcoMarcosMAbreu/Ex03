@@ -44,7 +44,7 @@ export async function meuClient(): Promise<void> {
    const id = await escolherNomeJogador();
    const client: net.Socket = new net.Socket();
 
-   client.connect(4000, 'localhost', () => {
+   client.connect(3000, 'localhost', () => {
       // console.log(`Conectado ao servidor como cliente ${id}`);
       client.write(`ID:${id}`);
    });
