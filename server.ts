@@ -18,6 +18,26 @@ function verificarLetra(letra: string, cliente: Cliente): string {
       return `A letra ${letra} não está presente na palavra`;
    }
 }
+function principaisEntradas(msgDoCliente: string,clientes: Cliente[],numeroJogador: number) {
+   if (msgDoCliente === 'desconectar') {
+      escreverNoSocket(clientes[numeroJogador].socket, 'Desconectado');
+      clientes[numeroJogador].socket.end();
+      console.log(`Cliente desconectado: ${clientes[numeroJogador].socket.remoteAddress}:${clientes[numeroJogador].socket.remotePort}`);
+
+   }else if (msgDoCliente.length === 1) {
+      const resultado = verificarLetra(msgDoCliente, clientes[numeroJogador]);
+      escreverNoSocket(clientes[numeroJogador].socket, `RESULT:${resultado}`);
+      const placarIndividual = gerarPlacarIndividual(clientes[numeroJogador]);
+      escreverNoSocket(clientes[numeroJogador].socket, `CHANCES:${placarIndividual.chances}`);
+   }
+}
+
+function infosIniciais(clientes: Cliente[]){
+   escreverNoSocket(clientes[0].socket, 'Você é o jogador 1');
+   escreverNoSocket(clientes[1].socket, 'Você é o jogador 2');
+   escreverNoSocket(clientes[0].socket, `Você tem ${clientes[0].chances} chances iniciais. Digite uma letra:`);
+   escreverNoSocket(clientes[1].socket, `Você tem ${clientes[1].chances} chances iniciais. Digite uma letra:`);
+}
 
 function gerarPlacarIndividual(cliente: Cliente): { chances: number; palavraAdvinhar: string } {
    return {
@@ -26,49 +46,52 @@ function gerarPlacarIndividual(cliente: Cliente): { chances: number; palavraAdvi
    };
 }
 
+export function minhaSala(): void {
+   const sockets: net.Socket[] = [];
+   let contador = 0;
 
-export function meuServer(): void {
    const server = net.createServer((socket: net.Socket) => {
-      const cliente: Cliente = {
-         chances: 8,
-         palavraAdvinhar: 'teste',
-         socket,
-         // . cada cliente é identificado pelo seu socket
-         // . o acesso é dentro do evento data do socket para ler e escrever dados
+      if (contador === 2) {
+         // . se uma terceira pessoa entrar precisa ser enviada
+         // .para uma sala de espera
+         escreverNoSocket(socket, 'A sala está cheia');
+         socket.end();
+         
+      } else {
+         console.log(`Cliente conectado: ${socket.remoteAddress}:${socket.remotePort}`);
+         sockets.push(socket);
+         contador++;
+         escreverNoSocket(socket, `Você é o ${contador}º cliente na sala.\n Aguarde...`);
+
+         if (contador === 2) {
+            const clientes: Cliente[] = sockets.map((s) => {
+               return {
+                  chances: 8,
+                  palavraAdvinhar: 'teste',
+                  socket: s,
+               };
+            });
+
+            infosIniciais(clientes)
+// .R
+            clientes[0].socket.on('data', (data: Buffer) => {
+               const msgDoCliente = data.toString().trim();
+               principaisEntradas(msgDoCliente,clientes,0)
+            });
+
+            clientes[1].socket.on('data', (data: Buffer) => {
+               const msgDoCliente = data.toString().trim();
+               principaisEntradas(msgDoCliente,clientes,1)
+            });
+         };
       };
-      // const { remoteAddress, remotePort } = socket;
-      console.log(`Cliente conectado: ${cliente.socket.remoteAddress}:${cliente.socket.remotePort}`);
-      escreverNoSocket(socket, 'Bem vindo');
-
-      // console.log(`Teste socket: ${cliente.socket.remoteAddress}`);
-      // forma correta
-
-      escreverNoSocket(socket, `Você tem ${cliente.chances} chances iniciais. Digite uma letra:`);
-
-      socket.on('data', (data: Buffer) => {
-         const msgDoCliente = data.toString().trim();
-//. Essa parte vai precisar ser refatorada
-         if (msgDoCliente === 'desconectar') {
-            escreverNoSocket(socket, 'Desconectado');
-            socket.end();
-            console.log(`Cliente desconectado: ${cliente.socket.remoteAddress}:${cliente.socket.remotePort}`);
-         } else if (msgDoCliente.length === 1) {
-            const resultado = verificarLetra(msgDoCliente, cliente);
-            escreverNoSocket(socket, `RESULT:${resultado}`);
-            const placarIndividual = gerarPlacarIndividual(cliente);
-            escreverNoSocket(socket, `CHANCES:${placarIndividual.chances}`);
-            // escreverNoSocket(socket, `PALAVRA:${placarIndividual.palavraAdvinhar}`);
-         }
-      });
    });
-
    server.on('error', (err: Error) => {
       console.error(`Ocorreu um erro no servidor: ${err.message}`);
    });
 
-   server.listen(4000, () => {
-      console.log('Servidor inicializado na porta 4000');
+   server.listen(3000, () => {
+      console.log('Servidor inicializado na porta 3000');
    });
 }
-
-meuServer();
+minhaSala()
