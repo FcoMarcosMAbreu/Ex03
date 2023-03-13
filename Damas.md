@@ -23,3 +23,12 @@ A captura é obrigatória. Se no mesmo lance se apresentar mais de um modo de ca
 
 A pedra que durante o lance de captura de várias peças, apenas passe por qualquer casa de coroação, sem aí parar, não será promovida à dama.
 
+## Esquema de adjacentes
+
+```ascii
+
+null | 2 ->  x ███ x  <- 3 | null
+            ███ x ███
+null | 0 ->  x ███ x  <- 1 | null
+
+```
