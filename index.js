@@ -411,8 +411,8 @@ function treat(i) {
             break
         }
         // 2º caractere
-    if (commandArrey[0][1] < 0 || commandArrey[0][1] > 7) console.log("2º caractere inválido!")
-    else command[1] = commandArrey[0][1]
+    if (commandArrey[0][1] < 1 || commandArrey[0][1] > 8) console.log("2º caractere inválido!")
+    else command[1] = commandArrey[0][1] - 1
         // 3º caractere
     switch (commandArrey[1][0]) {
         case "a":
@@ -452,8 +452,8 @@ function treat(i) {
             break
         }
         // 4º caractere
-    if (commandArrey[1][1] < 0 || commandArrey[1][1] > 7) console.log("4º caractere inválido!")
-    else command[3] = commandArrey[1][1]
+    if (commandArrey[1][1] < 1 || commandArrey[1][1] > 8) console.log("4º caractere inválido!")
+    else command[3] = commandArrey[1][1] - 1
     // Tem peça?
     if (board[command[0]][command[1]].filled) hasPiece = true 
     // É sua?
@@ -478,11 +478,12 @@ do {
 
 function move(a, b, c, d) {
     board[c][d].filled = board[a][b].filled
-    board[c][d].piece = board[a][b].filled
+    board[c][d].piece = board[a][b].piece
     board[a][b].filled = false
     board[a][b].piece = ""
 }
 
+console.log(command[0], command[1], command[2], command[3])
 move(command[0], command[1], command[2], command[3])
 
 showBoard()
