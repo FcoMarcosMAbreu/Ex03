@@ -106,3 +106,27 @@ export function identificarIndexDoSocket(socket: net.Socket, sockets: net.Socket
    }
    return -1 // caso socket não encontrado
 };
+
+
+export function msgJogador1(data: Buffer,clientes: Cliente[], socket: net.Socket, sockets: net.Socket[]){
+   const msgDoCliente = data.toString().trim();
+
+   let index = identificarIndexDoSocket(socket, sockets)
+   tratarPrincipaisEntradas(msgDoCliente, sockets[index], sockets, clientes)//!
+}
+
+export function msgJogador2(data: Buffer,clientes: Cliente[], socket: net.Socket, sockets: net.Socket[],outroJogador:number){
+   const msgDoCliente = data.toString().trim();
+
+      // escreverNoSocket(sockets[outroJogador],'teste2')
+   tratarPrincipaisEntradas(msgDoCliente, sockets[outroJogador], sockets, clientes)
+}
+
+
+const bloquearJogadador = (podeJogar: boolean): boolean =>{
+   if (podeJogar === true) {
+      return podeJogar = false
+   } else {
+      return podeJogar = true
+   }
+}
