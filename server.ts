@@ -17,14 +17,14 @@ function minhaSala(): void {
 
       if (contador % 2 !== 0 && contador >= 2) {
          // .se impar e >=2 ou seja depois da primeira dupla
-         dependencias.escreverNoSocket(socket, `Você está na sala de espera.\n Aguarde o próximo jogador...`);
+         dependencias.escreverNoSocket(socket, `***Você está na sala de espera.***\n Aguarde o próximo jogador...`);
          console.log(`Cliente número: ${contador} levado para sala de espera`);
 
       } else if (contador % 2 == 0 && contador > 0) { //. se par
 
          const clientes: dependencias.Cliente[] = sockets.map((s) => {
             return {
-               chances: 2,
+               chances: 8,
                palavraAdvinhar: 'teste',
                socket: s,
             };
@@ -32,24 +32,18 @@ function minhaSala(): void {
 
          dependencias.infoIniciaisParaDupla(clientes, socket, sockets)
 
-         // ouvir jogador 1
+         // ouvir jogadores
          socket.on('data', (data: Buffer) => {
-            const msgDoCliente = data.toString().trim();
-
-            let index = dependencias.identificarIndexDoSocket(socket, sockets)
-            dependencias.tratarPrincipaisEntradas(msgDoCliente, sockets[index], sockets, clientes)//!
+            dependencias.msgJogador1(data,clientes,socket,sockets)
          })
 
-         // ouvir jogador 2
          let outroJogador = dependencias.encontrarJ1eJ2(socket, sockets)
          sockets[outroJogador].on('data', (data: Buffer) => {
-            const msgDoCliente = data.toString().trim();
-
-            // escreverNoSocket(sockets[outroJogador],'teste2')
-            dependencias.tratarPrincipaisEntradas(msgDoCliente, sockets[outroJogador], sockets, clientes)//!
+            dependencias.msgJogador2(data,clientes,socket,sockets,outroJogador)
          })
       };
    });
+
 
    server.on('error', (err: Error) => {
       console.error(`Ocorreu um erro no servidor: ${err.message}`);
