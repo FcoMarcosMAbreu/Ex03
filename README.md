@@ -1,3 +1,7 @@
+# Exercício 3
+
+Vídeo explicando o que foi feito: [Jogo em rede atividade 03](https://www.youtube.com/watch?v=Axjoen3cJ44).
+
 Com base nos códigos repassados, modifique as implementações para atender o
 que se pede abaixo:
 
@@ -24,3 +28,5 @@ que se pede abaixo:
 11) Implemente mais duas funcionalidades relacionadas a jogos em rede diferentes das sugeridas nesta atividade.
 
 ![image](https://user-images.githubusercontent.com/61996692/223267419-5562ae1a-1a38-42ac-8ce3-95ea84b1f52b.png)
+
+![diagram](https://github.com/FcoMarcosMAbreu/Ex03/blob/dev/diagram.png?raw=true)
