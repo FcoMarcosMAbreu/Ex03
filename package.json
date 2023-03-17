@@ -6,7 +6,6 @@
   "author": "Marcos Abreu <MAbr88@ProtonMail.com>",
   "license": "MIT",
   "private": false,
-  "type": "module",
   "scripts": {
     "dev-server": "ts-node server.ts",
     "dev-client": "ts-node client.ts"

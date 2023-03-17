@@ -25,7 +25,7 @@ const receberResultadoJogada = (id: string, data: Buffer): void => {
    }
 };
 
-const tratarPrincipaisEntradas = (input: string, client: net.Socket): void => {
+/* const tratarPrincipaisEntradas = (input: string, client: net.Socket): void => {
    const letra = input.trim().split('');
    if (letra.length === 1) {
       client.write(`${letra[0]}`);
@@ -36,7 +36,7 @@ const tratarPrincipaisEntradas = (input: string, client: net.Socket): void => {
    }else {
       console.log('> Digite apenas uma letra');
    }
-};
+}; */
 
 
 
@@ -44,7 +44,7 @@ export async function meuClient(): Promise<void> {
    const id = await escolherNomeJogador();
    const client: net.Socket = new net.Socket();
 
-   client.connect(4000, 'localhost', () => {
+   client.connect(3000, 'localhost', () => {
       // console.log(`Conectado ao servidor como cliente ${id}`);
       client.write(`ID:${id}`);
    });
@@ -63,7 +63,9 @@ export async function meuClient(): Promise<void> {
    });
 
    lerEntrada.on('line', (input: string) => {
-      tratarPrincipaisEntradas(input, client);
+      /* tratarPrincipaisEntradas(input, client); */
+
+      client.write(input);
    });
 
    client.on('close', () => {
