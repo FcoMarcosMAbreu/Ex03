@@ -354,14 +354,27 @@ for (let i = 0; i <= 7; i++) {
 
 //showBoard()
 
-board[1][1].filled = true
-board[1][1].piece = "●"
+/* board[1][1].filled = true
+board[1][1].piece = "●" */
+
+/* board[5][1].filled = true
+board[5][1].piece = "●" */
+
+board[1][5].filled = true
+board[1][5].piece = "●"
 
 showBoard()
 
 let mineIs = "●" // Revisar isso!
-let rawInput = "b2 c3"
-let command = []
+/* let rawInput = "b2 c3" */
+let rawInput = "f2 g3"
+
+let fromColumn = null
+let toColumn = null
+let fromRow = null
+let toRow = null
+// let command = [] // Depreciado.
+
 let validInput = false
 let hasPiece = false
 let belongsToMe = false
@@ -376,35 +389,35 @@ function treat(i) {
     switch (commandArrey[0][0]) {
         case "a":
         case "A":
-            command[0] = 0
+            fromColumn = 0
             break
         case "b":
         case "B":
-            command[0] = 1
+            fromColumn = 1
             break
         case "c":
         case "C":
-            command[0] = 2
+            fromColumn = 2
             break
         case "d":
         case "D":
-            command[0] = 3
+            fromColumn = 3
             break
         case "e":
         case "E":
-            command[0] = 4
+            fromColumn = 4
             break
         case "f":
         case "F":
-            command[0] = 5
+            fromColumn = 5
             break
         case "g":
         case "G":
-            command[0] = 6
+            fromColumn = 6
             break
         case "h":
         case "H":
-            command[0] = 7
+            fromColumn = 7
             break
         default:
             console.log("1º caractere inválido!")
@@ -412,40 +425,40 @@ function treat(i) {
         }
         // 2º caractere
     if (commandArrey[0][1] < 1 || commandArrey[0][1] > 8) console.log("2º caractere inválido!")
-    else command[1] = commandArrey[0][1] - 1
+    else fromRow = commandArrey[0][1] - 1
         // 3º caractere
     switch (commandArrey[1][0]) {
         case "a":
         case "A":
-            command[2] = 0
+            toColumn = 0
             break
         case "b":
         case "B":
-            command[2] = 1
+            toColumn = 1
             break
         case "c":
         case "C":
-            command[2] = 2
+            toColumn = 2
             break
         case "d":
         case "D":
-            command[2] = 3
+            toColumn = 3
             break
         case "e":
         case "E":
-            command[2] = 4
+            toColumn = 4
             break
         case "f":
         case "F":
-            command[2] = 5
+            toColumn = 5
             break
         case "g":
         case "G":
-            command[2] = 6
+            toColumn = 6
             break
         case "h":
         case "H":
-            command[2] = 7
+            toColumn = 7
             break
         default:
             console.log("3º caractere inválido!")
@@ -453,15 +466,15 @@ function treat(i) {
         }
         // 4º caractere
     if (commandArrey[1][1] < 1 || commandArrey[1][1] > 8) console.log("4º caractere inválido!")
-    else command[3] = commandArrey[1][1] - 1
+    else toRow = commandArrey[1][1] - 1
     // Tem peça?
-    if (board[command[0]][command[1]].filled) hasPiece = true 
+    if (board[fromRow][fromColumn].filled) hasPiece = true 
     // É sua?
-    if (board[command[0]][command[1]].piece === mineIs) belongsToMe = true
+    if (board[fromRow][fromColumn].piece === mineIs) belongsToMe = true
     // Qual adjacente?
-    if ((command[2] === (command[0] + 1)) && ((command[3] === (command[1] - 1)) || (command[3] === (command[1] - 1)))) isAdjacent = true
+    if ((toColumn === (fromColumn + 1)) && ((toRow === (fromRow - 1)) || (toRow === (fromRow - 1)))) isAdjacent = true
     // Tá ocupado?
-    if (board[command[2]][command[3]].filled === false) freeWay = true
+    if (board[toRow][toColumn].filled === false) freeWay = true
     // Por quem?
     // Pode capturar? (Adjacente do adjacente?)
     // ... Mais em breve ...
@@ -483,7 +496,7 @@ function move(a, b, c, d) {
     board[a][b].piece = ""
 }
 
-console.log(command[0], command[1], command[2], command[3])
-move(command[0], command[1], command[2], command[3])
+console.log(fromRow, fromColumn, toRow, toColumn)
+move(fromRow, fromColumn, toRow, toColumn)
 
 showBoard()
